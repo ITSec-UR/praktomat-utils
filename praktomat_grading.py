@@ -3,9 +3,9 @@
 
 
 import psycopg2
+import os
 
-
-PRAKTOMAT_ADMIN_ID = 623
+PRAKTOMAT_ADMIN_ID = os.environ["PRAKTOMAT_ADMIN_ID"]
 
 
 def grade_solutions(regex_task, id_passed, id_failed):
