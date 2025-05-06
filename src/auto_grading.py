@@ -27,8 +27,8 @@ def grade_solutions(conn, task, id_admin, id_passed, id_failed):
     run_sql(conn, query_grade_failed)
 
 
-def get_tasks(conn, regex_task, rating_scale, wait_days=5):
-    query_get_tasks = f"SELECT id FROM tasks_task WHERE title SIMILAR TO '{regex_task}' AND final_grade_rating_scale_id = {rating_scale} AND submission_date < now() - INTERVAL '{wait_days} DAY' AND publication_date > now() - INTERVAL '{wait_days + 30} DAY' ORDER BY id ASC;"
+def get_tasks(conn, regex_task, rating_scale, wait_days=5, interval_days=30):
+    query_get_tasks = f"SELECT id FROM tasks_task WHERE title SIMILAR TO '{regex_task}' AND final_grade_rating_scale_id = {rating_scale} AND submission_date < now() - INTERVAL '{wait_days} DAY' AND publication_date > now() - INTERVAL '{wait_days + interval_days} DAY' ORDER BY id ASC;"
     return run_sql(conn, query_get_tasks)
 
 
@@ -70,6 +70,7 @@ def run():
     print(f"Run Praktomat grade solutions for PRAKTOMAT_ADMIN_ID = {id_admin}")
 
     wait_days = int(environ.get("WAIT_DAYS", 5))
+    interval_days = int(environ.get("INTERVAL_DAYS", 30))
 
     if 'TASK_REGEX' in environ:
         task_regexes = [e.strip() for e in environ['TASK_REGEX'].split(',')]
@@ -82,7 +83,7 @@ def run():
         rating_scale, id_failed, id_passed = get_rating(conn, rating_regex)
         for task_regex in task_regexes:
             print(f"Task = {task_regex} Rating = {rating_regex}")
-            tasks = get_tasks(conn, task_regex, rating_scale, wait_days)
+            tasks = get_tasks(conn, task_regex, rating_scale, wait_days, interval_days)
             if tasks is None:
                 raise ValueError(
                     f"Couldn't find any tasks with task regex = {task_regex} and rating_regex = {rating_regex}")

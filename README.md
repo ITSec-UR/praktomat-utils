@@ -21,4 +21,5 @@ This module automatically grades task with admin account. This module should onl
 - `PRAKTOMAT_ADMIN_NAME`: Search for ID for an admin account. It is an alternative to `PRAKTOMAT_ADMIN_ID` if the ID is not known
 - `RATING_REGEX`: Only applies this module to tasks with this rating scale (name). Can contain multiple regex statements separated by commas
 - `TASK_REGEX`: Only applies this module to tasks that are similar to this variable. Can contain multiple regex statements separated by commas (default: `H[0-9]{2}%", "Ü[0-9]{2}%`)
-- `WAIT_DAYS`: Specifies how long the task should be expired until the module is applied. This should enable tutors to change the assessment scale before automated assessment, e.g. homework to SBL (default: 5)
+- `WAIT_DAYS`: Specifies how long the task should be expired until the module is applied. This should enable tutors to change the assessment scale before automated assessment, e.g. homework to SBL (default: 5 days)
+- `INTERVAL_DAYS`: Specifies the number of past days to include when evaluating tasks for attestation (default: 30 days)
