@@ -28,10 +28,11 @@ def get_tasks(conn, regex_task):
 
 
 def run():
-    max_uploads = (
-        environ.get('PRAKTOMAT_MAX_UPLOADS') if environ.get(
-            'PRAKTOMAT_MAX_UPLOADS') else 3
-    )
+    max_uploads = int(environ.get('PRAKTOMAT_MAX_UPLOADS', 3))
+    if max_uploads <= 0:
+        print("Stop limit homework solutions due to PRAKTOMAT_MAX_UPLOADS = {} <= 0".format(max_uploads))
+        return
+
     print("Run Praktomat limit homework solutions to {}".format(max_uploads))
 
     conn = connect_db()
@@ -42,7 +43,7 @@ def run():
     if 'TASK_REGEX' in environ:
         task_regexes = [e.strip() for e in environ['TASK_REGEX'].split(',')]
     else:
-        task_regexes = ["(OOP|ADP): H[0-9]{2}%"]
+        task_regexes = ["H[0-9]{2}%"]
 
     for task_regex in task_regexes:
         print(f"\t- {task_regex}")

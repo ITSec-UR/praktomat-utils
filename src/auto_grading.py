@@ -7,7 +7,7 @@ from database import connect_db, run_sql
 
 
 def grade_solutions(conn, task, id_admin, id_passed, id_failed):
-    """Creates attestations for all OOP tutorial students.
+    """Creates attestations for all tutorial students.
 
     Parameters:
     conn - Connection to Database
@@ -51,15 +51,16 @@ def get_rating(conn, rating_name):
     query_rating_item = "SELECT id FROM attestation_ratingscaleitem WHERE scale_id = {} AND position < 2 ORDER BY position ASC;".format(
         rating
     )
+    print(query_rating_item)
     result = run_sql(conn, query_rating_item)
     id_failed, id_passed = [r[0] for r in result]
     return rating, id_failed, id_passed
 
 
 def run():
-    print("Run Praktomat grade solutions")
-    id_admin = environ["PRAKTOMAT_ADMIN_ID"]
-    wait_days = int(environ["WAIT_DAYS"]) if 'WAIT_DAYS' in environ else 5
+    id_admin = environ.get("PRAKTOMAT_ADMIN_ID", 1)
+    wait_days = int(environ.get("WAIT_DAYS", 5))
+    print(f"Run Praktomat grade solutions for PRAKTOMAT_ADMIN_ID = {id_admin}")
     conn = connect_db()
     if not conn:
         print("No connection is established!")
@@ -68,14 +69,14 @@ def run():
     if 'TASK_REGEX' in environ:
         task_regexes = [e.strip() for e in environ['TASK_REGEX'].split(',')]
     else:
-        task_regexes = ["(OOP|ADP): H[0-9]{2}%", "(OOP|ADP): Ü[0-9]{2}%"]
+        task_regexes = ["H[0-9]{2}%", "Ü[0-9]{2}%"]
 
     ratings = [e.strip() for e in environ["RATING_REGEX"].split(',')]
 
     for rating_regex in ratings:
         rating_scale, id_failed, id_passed = get_rating(conn, rating_regex)
         for task_regex in task_regexes:
-            print(f"\t- Task={task_regex} Rating={rating_regex}")
+            print(f"Task = {task_regex} Rating = {rating_regex}")
             tasks = get_tasks(conn, task_regex, rating_scale, wait_days)
             for task in tasks:
                 grade_solutions(conn, task[0], id_admin, id_passed, id_failed)

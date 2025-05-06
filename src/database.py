@@ -1,6 +1,6 @@
 from os import environ
 
-import psycopg2
+import psycopg
 
 
 def run_sql(conn, sql):
@@ -11,13 +11,13 @@ def run_sql(conn, sql):
 
         cursor.close()
         return results
-    except psycopg2.DatabaseError as error:
+    except psycopg.DatabaseError as error:
         print(error)
 
 
 def connect_db():
     try:
-        ps_conn = psycopg2.connect(
+        ps_conn = psycopg.connect(
             "host={} port={} dbname={} user={} password={}".format(
                 environ["POSTGRES_HOST"],
                 environ["POSTGRES_PORT"],
@@ -28,5 +28,5 @@ def connect_db():
         )
         ps_conn.autocommit = True
         return ps_conn
-    except psycopg2.DatabaseError as error:
+    except psycopg.DatabaseError as error:
         print(error)
