@@ -4,10 +4,12 @@ import psycopg
 
 
 def run_sql(conn, sql):
+    print(sql)
+
     try:
         cursor = conn.cursor()
         cursor.execute(sql)
-        results = [record for record in cursor]
+        results = cursor.fetchall()
 
         cursor.close()
         return results
