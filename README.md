@@ -1,25 +1,42 @@
-# Dockerfile for managing Praktomat submissions
-Warning: This container interacts directly with Praktomat's database (CRUD operations). It should run as a cron job, e.g. every Monday 03:00 (0 3 * * 1). For the database connection it needs the following environment variables.
+# 🐳 Dockerfile for Managing Praktomat Submissions
+
+⚠️ **Warning:** This container directly interacts with the Praktomat database (performing Create, Read, Update, and Delete operations). It is intended to run as a scheduled **cron job**, e.g., every Monday at 03:00 (`0 3 * * 1`).
+
+To connect to the database, the following environment variables **must** be provided:
+
 - `POSTGRES_DB`
 - `POSTGRES_HOST`
 - `POSTGRES_PORT`
 - `POSTGRES_USER`
 - `POSTGRES_PASSWORD`
 
-The following util modules are supported.
+---
 
-## Limit submissions
-This module limits the students' submissions by setting all solutions with a higher number to not accepted and not final. All submissions that exceed the maximum number will explicitly not be deleted. The following environment variables can be set.
+## 📦 Supported Utility Modules
+
+### 1. ⛔ Limit Submissions
+
+This module limits the number of submissions per student. Any additional submissions beyond the allowed maximum are marked as not accepted and not final. Note: Exceeding submissions are **not deleted**.
+
+#### Environment Variables
+
 - `LIMIT_SUBMISSIONS`: Set to `True` to enable this module
-- `PRAKTOMAT_MAX_UPLOADS`: Limit submissions to this number
-- `TASK_REGEX`: Only applies this module to tasks that are similar to this variable. Can contain multiple regex statements separated by commas (default: `H[0-9]{2}%`)
+- `PRAKTOMAT_MAX_UPLOADS`: Maximum number of allowed submissions
+- `TASK_REGEX`: Apply this module only to tasks matching this regex. Multiple comma-separated regex patterns are supported (default: `*`)
 
-## Auto grading
-This module automatically grades task with admin account. This module should only be used if automated grading makes sense. The grading scheme should be binary, 0 for fail, 1 for pass. The following environment variables can be set.
+---
+
+### 2. 🤖 Auto Grading
+
+This module automatically grades tasks using an admin account. It is designed for environments where automated grading is meaningful. The grading scheme should be binary: **0 = fail**, **1 = pass**.
+
+#### Environment Variables
+
 - `AUTO_GRADING`: Set to `True` to enable this module
-- `PRAKTOMAT_ADMIN_ID`: ID for admin account which is used for issuing the attestations (usually id=1 but you can verify with `select id from auth_user where username='praktomat';`)
-- `PRAKTOMAT_ADMIN_NAME`: Search for ID for an admin account. It is an alternative to `PRAKTOMAT_ADMIN_ID` if the ID is not known
-- `RATING_REGEX`: Only applies this module to tasks with this rating scale (name). Can contain multiple regex statements separated by commas
-- `TASK_REGEX`: Only applies this module to tasks that are similar to this variable. Can contain multiple regex statements separated by commas (default: `H[0-9]{2}%", "Ü[0-9]{2}%`)
-- `WAIT_DAYS`: Specifies how long the task should be expired until the module is applied. This should enable tutors to change the assessment scale before automated assessment, e.g. homework to SBL (default: 5 days)
-- `INTERVAL_DAYS`: Specifies the number of past days to include when evaluating tasks for attestation (default: 30 days)
+- `PRAKTOMAT_ADMIN_ID`: ID of the admin account issuing attestations (commonly `1`; verify via: `SELECT id FROM auth_user WHERE username = 'praktomat';`)
+- `PRAKTOMAT_ADMIN_NAME`: Alternative to `PRAKTOMAT_ADMIN_ID`; searches for an admin account by username
+- `RATING_NAME`: Optional. Only apply grading to tasks with a rating scale matching this name. Multiple comma-separated values supported (default: `*`)
+- `TASK_REGEX`: Optional. Only apply grading to tasks matching this regex. Multiple comma-separated values supported (default: `*`)
+- `WAIT_DAYS`: Number of days after a task's submission date before grading begins (default: `5`)
+- `INTERVAL_DAYS`: Time window (in days) to look back for eligible tasks to grade (default: `30`)
+- `WORK_DATA`: Filesystem path to submitted solution files, used to generate annotated feedback (default: `/work-data`)
