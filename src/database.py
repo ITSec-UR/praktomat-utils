@@ -1,5 +1,6 @@
 import sys
-from os import environ
+import os
+from pathlib import Path
 
 import psycopg
 
@@ -24,10 +25,10 @@ def run_sql(conn, query, params=None):
             cursor.execute(query, params)
             if cursor.description:
                 return cursor.fetchall()
-            return []
+            return cursor.rowcount
     except psycopg.DatabaseError as e:
         print(f"[SQL Error] {e}\nQuery: {query}\nParams: {params}", file=sys.stderr)
-        return []
+        return None
 
 
 def connect_db():
@@ -35,13 +36,17 @@ def connect_db():
     Establish a PostgreSQL connection using environment variables.
     Returns a psycopg.Connection object with autocommit enabled.
     """
+
+    pw_path = Path(os.environ["POSTGRES_PASSWORD"])
+    db_pass = pw_path.read_text() if pw_path.exists() else os.environ["POSTGRES_PASSWORD"]
+
     try:
         conn = psycopg.connect(
-            host=environ["POSTGRES_HOST"],
-            port=environ["POSTGRES_PORT"],
-            dbname=environ["POSTGRES_DB"],
-            user=environ["POSTGRES_USER"],
-            password=environ["POSTGRES_PASSWORD"]
+            host=os.environ["POSTGRES_HOST"],
+            port=os.environ["POSTGRES_PORT"],
+            dbname=os.environ["POSTGRES_DB"],
+            user=os.environ["POSTGRES_USER"],
+            password=db_pass
         )
         conn.autocommit = True
         return conn
