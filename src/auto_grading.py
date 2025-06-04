@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+
 from database import connect_db, run_sql
 
 
@@ -72,10 +73,10 @@ def write_annotated_solution_files(conn, attested_ids, work_data):
 
             if existing:
                 continue  # Skip if already annotated
-            
+
             filename: Path = Path(work_data) / file_path
             if filename.suffix in {'.iml'}:
-                continue # Skip uninteressting files
+                continue  # Skip uninteressting files
 
             try:
                 file_content = filename.read_text()
@@ -95,7 +96,7 @@ def get_tasks(conn, task_name=None, rating_scale=None, wait_days=0, interval_day
     interval_days_filter = f"AND submission_date > now() - INTERVAL '{wait_days + interval_days} DAY'" if interval_days else ""
 
     query = f"""
-    SELECT id FROM tasks_task WHERE submission_date < now() - INTERVAL '{wait_days} DAY' {interval_days_filter} {task_filter}  {rating_filter} ORDER BY id ASC;
+    SELECT id, title FROM tasks_task WHERE submission_date < now() - INTERVAL '{wait_days} DAY' {interval_days_filter} {task_filter}  {rating_filter} ORDER BY id ASC;
     """
     return run_sql(conn, query)
 
@@ -183,7 +184,9 @@ def run():
 
             tasks = get_tasks(conn, task_regex, rating_scale, wait_days, interval_days)
             for task in tasks:
-                attested_ids = grade_solutions(conn, task[0], admin_id, id_passed, id_failed)
+                task_id, task_name = task
+                attested_ids = grade_solutions(conn, task_id, admin_id, id_passed, id_failed)
+                print(f"[Report] task_name = {task_name}, task_id = {task_id}, num_attestation = {len(attested_ids)}")
                 if attested_ids:
                     write_annotated_solution_files(conn, attested_ids, work_data)
     conn.close()
