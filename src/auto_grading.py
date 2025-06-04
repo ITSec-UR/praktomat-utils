@@ -76,7 +76,7 @@ def write_annotated_solution_files(conn, attested_ids, work_data):
 
             filename: Path = Path(work_data) / file_path
             if filename.suffix in {'.iml'}:
-                continue  # Skip uninteressting files
+                continue  # Skip uninteresting files
 
             try:
                 file_content = filename.read_text()
@@ -84,9 +84,9 @@ def write_annotated_solution_files(conn, attested_ids, work_data):
                     run_sql(
                         conn, "INSERT INTO attestation_annotatedsolutionfile (content, attestation_id, solution_file_id) VALUES (%s, %s, %s);", (str(file_content), attestation_id, solution_file_id))
             except (FileNotFoundError, IOError, UnicodeDecodeError) as e:
-                print(f"Error reading file {file_path}: {e}")
+                print(f"[Error] Reading file {file_path}: {e}")
             except Exception as e:
-                print(f"Unexpected error: {e}")
+                print(f"[Error] Unexpected error: {e}")
 
 
 def get_tasks(conn, task_name=None, rating_scale=None, wait_days=0, interval_days=30):

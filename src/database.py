@@ -45,9 +45,7 @@ def run_sql(conn, query, params=None):
                 print(f"[SQL] {full_query}")
 
             cursor.execute(query, params)
-            if cursor.description:
-                return cursor.fetchall()
-            return cursor.rowcount
+            return cursor.fetchall()
     except psycopg.DatabaseError as e:
         print(f"[SQL Error] {e}\nQuery: {query}\nParams: {params}", file=sys.stderr)
         return []
