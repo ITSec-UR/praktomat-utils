@@ -26,7 +26,7 @@ def grade_solutions(conn, task_id, admin_id, id_passed=None, id_failed=None):
     INSERT INTO attestation_attestation (created, public_comment, private_comment, final, published, published_on, author_id, final_grade_id, solution_id)
     SELECT now(), '{public_comment}', '', 't', 't', now(), {admin_id}, {id_passed}, solutions_solution.id
     FROM accounts_user, solutions_solution, tasks_task
-    WHERE accounts_user.user_ptr_id = solutions_solution.author_id AND tasks_task.id = solutions_solution.task_id AND accounts_user.user_ptr_id = solutions_solution.author_id AND solutions_solution.final = 't' AND solutions_solution.accepted = 't' AND solutions_solution.plagiarism  = 'f' AND 't' IN (SELECT bool_and(passed) FROM checker_checkerresult WHERE solution_id = solutions_solution.id AND object_id NOT IN (SELECT id FROM checker_checkstylechecker)) AND tasks_task.id = {task_id} AND NOT EXISTS (SELECT solution_id FROM attestation_attestation WHERE attestation_attestation.solution_id = solutions_solution.id) RETURNING id;
+    WHERE accounts_user.user_ptr_id = solutions_solution.author_id AND tasks_task.id = solutions_solution.task_id AND accounts_user.user_ptr_id = solutions_solution.author_id AND solutions_solution.final = 't' AND solutions_solution.accepted = 't' AND solutions_solution.plagiarism  = 'f' AND COALESCE((SELECT bool_and(passed) FROM checker_checkerresult WHERE solution_id = solutions_solution.id AND object_id NOT IN (SELECT id FROM checker_checkstylechecker)), true) AND tasks_task.id = {task_id} AND NOT EXISTS (SELECT solution_id FROM attestation_attestation WHERE attestation_attestation.solution_id = solutions_solution.id) RETURNING id;
     """
 
     query_grade_failed = f"""
